@@ -134,6 +134,13 @@ The main reason for using any other dithering algorithm would be
 - **Aesthetics** - dithering can be a cool image effect, and different methods will look different
 - **Speed** - error diffusion dithering is sequential and therefore single-threaded. But ordered dithering, like using `Bayer`, will use all available CPUs, which is much faster.
 
+## How do I get the palette?
+
+Sometimes the palette isn't an option, as it might determined by the hardware. Many e-ink screens can only display black and white for example, and so your palette is chosen for you.
+
+But in most cases you have all the colors available, and so you have to pick the ones that represent your image best. This is called [color quantization](https://en.wikipedia.org/wiki/Color_quantization).
+
+I might end up writing another library that implements some common algorithms for this, like median cut. But there are some libraries that exist already. [joshdk/quantize](https://github.com/joshdk/quantize) looks like the best one, although there is also [this one](https://pkg.go.dev/github.com/soniakeys/quant/median).
 
 ## Tips
 
