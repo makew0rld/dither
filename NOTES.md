@@ -1,0 +1,109 @@
+# NOTES
+
+- [x] Handle sRGB and explain
+- [x] Only accept `draw.Image` for images that must be modified, and explain `img.(draw.Image)` in docs
+- [x] Create `MapFunc` type
+- [x] Specify palette must be linear RGB, write conversion funcs
+- [x] Note that Map func must be thread-safe
+- [x] Write a function that parallelizes per-pixel operations - NumCPUs workers, going row by row
+- [x] Parallel palette ops
+- [x] Remove sRGB stuff and accept a color difference function
+- [x] Change code so it doesn't modify the image, stop using `draw.Image`
+  - Like this: https://github.com/esimov/dithergo/blob/803c1e3e8929fd4e167e019ac2c905d84e85b9ea/dither_color.go#L17-L23
+- [x] Explain and recommend color distance funcs on README and `doc.go`
+- [x] Implement generic dithering
+  - [x] Error diffusion regular
+  - [x] Combine ordered and error diffusion: https://observablehq.com/@jobleonard/ordered-error-diffusion-dithering
+- [x] Write some `ErrorDiffusionMatrix`s
+- [x] Memoize `closestColor`
+- [x] Write some map funcs
+- [x] Write bayer mapper
+- [x] Make cache apply per ditherer
+- [x] Test whether dithering works
+  - [x] Test sRGB vs linear for other types on gradient
+  - [x] Fix bayer
+  - [x] Test error diffusion
+  - [x] Test color images
+- [x] Write something that takes care of how color dist changes require the cache to be regnerated
+- [x] What about for grayscale? Test.
+- [x] Figure out about linear RGB vs sRGB - https://github.com/lucasb-eyer/go-colorful/issues/48
+  - I think I tentatively have this
+- [x] Make bayer and random dithering work with any palette matching color space
+  - [x] Create `PaletteMatcher` interface
+    -  `ColorDist(c1 color.Color, c2 color.Color) float32`
+    -  Function that performs the fixing algorithm called `GetLuminance` - takes value from [0, 1]
+       -  `GetLuminance(i float32) float32`
+ - [x] Modify `GetLuminance` output based on input - wrapper func
+ - [x] Make tests work
+- [x] Test to see the difference between CIELAB and sRGB
+- [x] Update docs
+- [x] Remove dither color space option, only use linear RGB
+  - [x] Create `NewDitherer` func that linearizes palette on start
+  - [x] Switch back to `uint8`
+  - [x] Make mapper, matrix, and numWorkers public and document them
+  - [x] Fix `dither_test.go`
+- [x] Remove `NoDither` since the results are inaccurate (see gradient images)
+- [x] Get no-dither (in `RandomNoiseGrayscale` temporarily) to work right
+- [x] Get tests to match Surma's lab
+- [x] Update bayer docs because bayer actually does make things brighter now
+- [x] Write `PixelMapperMatrix`
+- [x] Have `Bayer` use it
+- [x] Start with go-colorful
+- [x] Optimize `ToLinearRGB` and `ToSRGB`
+- [x] Remove color caching
+- [x] Implement `draw.Drawer` and `draw.Quantizer`
+- [x] Make palette an argument to `NewDitherer` and remove mutexes, etc
+- [x] Make `GetPalette` return a copy
+- [x] Test `Draw`
+- [x] Test `DitherPaletted`
+- [x] `GetColorModel` func
+- [x] Have separate `Config` versions of all funcs that return `image.Config` as well?
+- [x] For parallelization, split the image into `runtime.GOMAXPROCS(0)` equal parts
+  - https://github.com/anthonynsimon/bild/blob/master/parallel/parallel.go#L15
+- [x] Change `NumWorkers` to `SingleThreaded`
+- [x] Remove `TestBayerLargeColor`
+- [x] Allow uneven matrixes, like 4x1 - do whatever dither-me-this does
+  - https://github.com/ShadowfaxRodeo/dither-me-this/issues/1
+  - [ ] Edit Ordered Dithering wikipedia page and add citation to /jy/
+  - [x] Switch to X and Y for Bayer and use bit math calculations
+- [x] Support clustered-dot dithering
+- [x] Get `ClusteredDotDiagonal8x8_2` to work
+  - Use a struct that explicitly has the max value - `OrderedDitherMatrix`
+- [x] Fix matrices copied from old book so they tesselate properly - like on archive.is page
+- [x] Test all different matrices
+- [x] Test some with color images
+- [x] Test Bayer 4x1 output
+- [x] Check `Special` field
+- [x] Add `Serpentine` struct field and make use of it
+  - [x] Test
+- [x] Sync README and `doc.go`
+- [x] Check TODOs
+- [x] Remove commented code
+- [x] Look at bookmarks
+- [x] Remove unecessary images and fix testing to actually compare
+- [x] Test changing `rDenom` and update docs - increasing it makes the dithering less??
+- [x] Fix tests
+- [x] Make really nice README
+  - [x] Example images
+  - [x] GIF code example - single image and full image
+  - [x] Explain about which image encodings to use and why
+    - PNG, GIF, APNG (link to lib)
+    - Put in `doc.go` too?
+  - [x] Mention how `PixelMappers` are parallel while error diffusion is sequential, so the former is much faster
+- [ ] Upload to GitHub
+- [ ] Comment here that it can do this: https://github.com/anthonynsimon/bild/issues/64
+- [ ] Announce on Masto
+- [ ] Write blog post
+  - Announce it
+  - Say to read ditherpunk first
+  - Then explain how I applied matrices to any palette, and color images
+  - Explain other things I learned or developed
+  - Ask about how to generated clustered-dot matrices
+- [ ] Make these GitHub issues
+  - Why is error diffusion slightly different from Surma's
+  - Hilbert-Peano dither
+  - Add void-and-cluster / blue noise
+  - Yuliluoma 
+  - Riemersma - https://www.compuphase.com/riemer.htm
+  - Using `imageutil`
+    - Or just optimized At and Set funcs, see https://golang.org/issues/15759
