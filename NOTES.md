@@ -90,9 +90,9 @@
     - PNG, GIF, APNG (link to lib)
     - Put in `doc.go` too?
   - [x] Mention how `PixelMappers` are parallel while error diffusion is sequential, so the former is much faster
-- [ ] Upload to GitHub
-- [ ] Comment here that it can do this: https://github.com/anthonynsimon/bild/issues/64
-- [ ] Announce on Masto
+- [x] Upload to GitHub
+- [x] Comment here that it can do this: https://github.com/anthonynsimon/bild/issues/64
+- [x] Announce on Masto
 - [ ] Write blog post
   - Announce it
   - Say to read ditherpunk first

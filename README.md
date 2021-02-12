@@ -10,9 +10,9 @@ It does not support images that make use of the alpha channel, AKA transparency.
 | **Original** | **Dithering Algorithm** |
 | :-: | :-: |
 | | Floyd-Steinberg (black and white palette) |
-| [![](images/examples/david.png)](images/examples/david.png) | [![](images/examples/floyd-steinberg_david.png)](images/examples/floyd-steinberg_david.png) |
+| [![](images/examples/david.png)](https://raw.githubusercontent.com/makeworld-the-better-one/dither/master/images/examples/david.png) | [![](images/examples/floyd-steinberg_david.png)](https://raw.githubusercontent.com/makeworld-the-better-one/dither/master/images/examples/floyd-steinberg_david.png) |
 | | Floyd-Steinberg (red, green, yellow, black) |
-| [![](images/examples/peppers_small.png)](images/examples/peppers_small.png) | [![](images/examples/floyd-steinberg_peppers.png)](images/examples/floyd-steinberg_peppers.png)
+| [![](images/examples/peppers_small.png)](https://raw.githubusercontent.com/makeworld-the-better-one/dither/master/images/examples/peppers_small.png) | [![](images/examples/floyd-steinberg_peppers.png)](https://raw.githubusercontent.com/makeworld-the-better-one/dither/master/images/examples/floyd-steinberg_peppers.png)
 
 ## Types of dithering supported
 
