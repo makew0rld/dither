@@ -37,7 +37,7 @@ var ClusteredDot4x4 = OrderedDitherMatrix{
 	Max: 16,
 }
 
-// ClusteredDot8x8 comes from http://caca.zoy.org/study/part2.html
+// ClusteredDotDiagonal8x8 comes from http://caca.zoy.org/study/part2.html
 //
 // They say it "mimics the halftoning techniques used by newspapers". It is called
 // "Diagonal" because the resulting dot pattern is at a 45 degree angle.
@@ -164,7 +164,7 @@ var ClusteredDot6x6 = OrderedDitherMatrix{
 	Max: 36,
 }
 
-// ClusteredDotSpiral comes from Figure 5.13 of the book Digital Halftoning by
+// ClusteredDotSpiral5x5 comes from Figure 5.13 of the book Digital Halftoning by
 // Robert Ulichney. It can represent "26 levels of gray". Its dimensions are 5x5.
 //
 // Instead of alternating dark and light dots like the other clustered-dot

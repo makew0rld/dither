@@ -42,7 +42,7 @@ type PixelMapper func(x, y int, r, g, b uint8) (uint8, uint8, uint8)
 //
 // Making the min and max different values, like using -0.2 and 0.5 will make
 // the image brighter or darker. In that example, the image will become brighter,
-// as the randomness is more likely to land on the postive side and increase the
+// as the randomness is more likely to land on the positive side and increase the
 // color value.
 //
 // If the noise puts the channel value too high or too low it will be clamped,
