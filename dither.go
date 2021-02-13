@@ -53,7 +53,7 @@ type Ditherer struct {
 	palette []color.Color
 
 	// linearPalette holds all the palette colors, but in linear RGB space.
-	linearPalette [][3]uint8
+	linearPalette [][3]uint16
 }
 
 // NewDitherer creates a new Ditherer that uses a copy of the provided palette.
@@ -70,10 +70,10 @@ func NewDitherer(palette []color.Color) *Ditherer {
 	copy(d.palette, palette)
 
 	// Create linear RGB version of the palette
-	d.linearPalette = make([][3]uint8, len(d.palette))
+	d.linearPalette = make([][3]uint16, len(d.palette))
 	for i := range d.linearPalette {
 		r, g, b := toLinearRGB(d.palette[i])
-		d.linearPalette[i] = [3]uint8{r, g, b}
+		d.linearPalette[i] = [3]uint16{r, g, b}
 	}
 
 	return d
@@ -104,20 +104,20 @@ func (d *Ditherer) GetPalette() []color.Color {
 	return p
 }
 
-func sqDiff(v1 uint8, v2 uint8) uint16 {
+func sqDiff(v1 uint16, v2 uint16) uint32 {
 	// This optimization is copied from Go stdlib, see
 	// https://github.com/golang/go/blob/go1.15.7/src/image/color/color.go#L314
 
-	d := uint16(v1) - uint16(v2)
+	d := uint32(v1) - uint32(v2)
 	return (d * d) >> 2
 }
 
 // closestColor returns the index of the color in the palette that's closest to
 // the provided one, using Euclidean distance in linear RGB space. The provided
 // RGB values must be linear RGB.
-func (d *Ditherer) closestColor(r, g, b uint8) int {
+func (d *Ditherer) closestColor(r, g, b uint16) int {
 	// Go through each color and find the closest one
-	color, best := 0, uint16(math.MaxUint16)
+	color, best := 0, uint32(math.MaxUint32)
 	for i, c := range d.linearPalette {
 		// Euclidean distance, but the square root part is removed
 		dist := sqDiff(r, c[0]) + sqDiff(g, c[1]) + sqDiff(b, c[2])
@@ -189,16 +189,16 @@ func (d *Ditherer) Dither(src image.Image) image.Image {
 	// Store linear values here instead of converting back and forth and storing
 	// sRGB values inside the image.
 	// Pointers are used to differentiate between a zero value and an unset value
-	lins := make([][][3]*uint8, b.Dy())
+	lins := make([][][3]*uint16, b.Dy())
 	for i := 0; i < len(lins); i++ {
-		lins[i] = make([][3]*uint8, b.Dx())
+		lins[i] = make([][3]*uint16, b.Dx())
 	}
 
 	// Setters and getters for that linear storage
-	linearSet := func(x, y int, r, g, b uint8) {
-		lins[y][x] = [3]*uint8{&r, &g, &b}
+	linearSet := func(x, y int, r, g, b uint16) {
+		lins[y][x] = [3]*uint16{&r, &g, &b}
 	}
-	linearAt := func(x, y int) (uint8, uint8, uint8) {
+	linearAt := func(x, y int) (uint16, uint16, uint16) {
 		c := lins[y][x]
 		if c[0] == nil {
 			// This pixel hasn't been linearized yet
@@ -225,11 +225,16 @@ func (d *Ditherer) Dither(src image.Image) image.Image {
 
 			new := d.linearPalette[newColorIdx]
 			// Quant errors in each channel
-			er, eg, eb := int16(oldR)-int16(new[0]), int16(oldG)-int16(new[1]), int16(oldB)-int16(new[2])
+			er, eg, eb := int32(oldR)-int32(new[0]), int32(oldG)-int32(new[1]), int32(oldB)-int32(new[2])
 
 			// Diffuse error in two dimensions
 			for yy := range d.Matrix {
 				for xx := range d.Matrix[yy] {
+					if d.Matrix[yy][xx] == 0 {
+						// Skip, because it won't affect anything
+						continue
+					}
+
 					// Get the coords of the pixel the error is being applied to
 					deltaX, deltaY := d.Matrix.Offset(xx, yy, curPx)
 					if d.Serpentine && y%2 == 0 {
@@ -247,12 +252,9 @@ func (d *Ditherer) Dither(src image.Image) image.Image {
 
 					r, g, b := linearAt(pxX, pxY)
 					linearSet(pxX, pxY,
-						// +0.5 is important to prevent pure white from being quantized to black due
-						// to the addition of error being rounded. This can be seen if you remove
-						// the +0.5 and test Floyd-Steinberg dithering on the gradient.png image.
-						clamp(float32(r)+float32(er)*d.Matrix[yy][xx]+0.5),
-						clamp(float32(g)+float32(eg)*d.Matrix[yy][xx]+0.5),
-						clamp(float32(b)+float32(eb)*d.Matrix[yy][xx]+0.5),
+						RoundClamp(float32(r)+float32(er)*d.Matrix[yy][xx]),
+						RoundClamp(float32(g)+float32(eg)*d.Matrix[yy][xx]),
+						RoundClamp(float32(b)+float32(eb)*d.Matrix[yy][xx]),
 					)
 				}
 			}
@@ -328,15 +330,16 @@ func (d *Ditherer) DitherPalettedConfig(src image.Image) (*image.Paletted, image
 	}
 }
 
-// clamp clamps i to the interval [0, 255].
-func clamp(i float32) uint8 {
+// RoundClamp clamps the number and rounds it, rounding ties to the nearest even number.
+// This should be used if you're writing your own PixelMapper.
+func RoundClamp(i float32) uint16 {
 	if i < 0 {
 		return 0
 	}
-	if i > 255 {
-		return 255
+	if i > 65535 {
+		return 65535
 	}
-	return uint8(i)
+	return uint16(math.RoundToEven(float64(i)))
 }
 
 // copyImage copies src's pixels into dst.

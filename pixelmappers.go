@@ -14,10 +14,11 @@ import (
 //
 // The provided RGB values are in the linear RGB space, and the returned values
 // must be as well. All dithering operations should be happening in this space
-// anyway, so this is done as a convenience.
+// anyway, so this is done as a convenience. The RGB values are in the range
+// [0, 65535], and must be returned in the same range.
 //
 // It must be thread-safe, as it will be called concurrently.
-type PixelMapper func(x, y int, r, g, b uint8) (uint8, uint8, uint8)
+type PixelMapper func(x, y int, r, g, b uint16) (uint16, uint16, uint16)
 
 // RandomNoiseGrayscale returns a PixelMapper that adds random noise to the
 // color before returning. This is the simplest form of dithering.
@@ -49,17 +50,17 @@ type PixelMapper func(x, y int, r, g, b uint8) (uint8, uint8, uint8)
 // not wrapped. Basically, don't worry about the values of your min and max
 // distorting the image in an unexpected way.
 func RandomNoiseGrayscale(min, max float32) PixelMapper {
-	return PixelMapper(func(x, y int, r, g, b uint8) (uint8, uint8, uint8) {
+	return PixelMapper(func(x, y int, r, g, b uint16) (uint16, uint16, uint16) {
 		// These values were taken from Wikipedia:
 		// https://en.wikipedia.org/wiki/Grayscale#Colorimetric_(perceptual_luminance-preserving)_conversion_to_grayscale
 		// 0.2126, 0.7152, 0.0722
-		// Then multiplied by 255, to scale them for uint8 color.
-		// Note that 54 + 183 + 19 = 256.
+		// Then multiplied by 65535, to scale them for 16-bit color.
+		// Note that 13933 + 46871 + 4732 = 65536
 		//
 		// Basically, this takes linear RGB and gives a linear gray.
-		gray := (54*uint16(r) + 183*uint16(g) + 19*uint16(b) + 1<<7) >> 8
+		gray := (13933*uint32(r) + 46871*uint32(g) + 4732*uint32(b) + 1<<15) >> 16
 
-		new := clamp(float32(gray) + 255.0*(rand.Float32()*(max-min)+min) + 0.5)
+		new := RoundClamp(float32(gray) + 65535.0*(rand.Float32()*(max-min)+min))
 		return new, new, new
 	})
 }
@@ -74,10 +75,10 @@ func RandomNoiseGrayscale(min, max float32) PixelMapper {
 // See RandomNoiseGrayscale for more details about values and how this function
 // works.
 func RandomNoiseRGB(minR, maxR, minG, maxG, minB, maxB float32) PixelMapper {
-	return PixelMapper(func(x, y int, r, g, b uint8) (uint8, uint8, uint8) {
-		return clamp(float32(r) + 255.0*(rand.Float32()*(maxR-minR)+minR) + 0.5),
-			clamp(float32(g) + 255.0*(rand.Float32()*(maxG-minG)+minG) + 0.5),
-			clamp(float32(b) + 255.0*(rand.Float32()*(maxB-minB)+minB) + 0.5)
+	return PixelMapper(func(x, y int, r, g, b uint16) (uint16, uint16, uint16) {
+		return RoundClamp(float32(r) + 65535.0*(rand.Float32()*(maxR-minR)+minR)),
+			RoundClamp(float32(g) + 65535.0*(rand.Float32()*(maxG-minG)+minG)),
+			RoundClamp(float32(b) + 65535.0*(rand.Float32()*(maxB-minB)+minB))
 	})
 }
 
@@ -165,14 +166,18 @@ func bayerMatrix(xdim, ydim uint) [][]uint {
 // and returns a value that can be added to a color instead of thresholded.
 //
 // scale is the number that's multiplied at the end, usually you want this to be
-// 255 to scale to match the color value range. value is the cell of the matrix.
+// 65535 to scale to match the color value range. value is the cell of the matrix.
 // max is the divisor of the cell value, usually this is the product of the matrix
 // dimensions.
 func convThresholdToAddition(scale float32, value uint, max uint) float32 {
 	// See:
 	// https://en.wikipedia.org/wiki/Ordered_dithering
 	// https://en.wikipedia.org/wiki/Talk:Ordered_dithering#Sources
-	return scale * (float32(value+1.0)/float32(max) - 0.5)
+
+	// 0.50000006 is next possible float32 value after 0.5. This is to correct
+	// a rounding error that occurs when the number is exactly 0.5, which results
+	// in pure black being dithered when it should be left alone.
+	return scale * (float32(value+1.0)/float32(max) - 0.50000006)
 }
 
 // Bayer returns a PixelMapper that applies a Bayer matrix with the specified size.
@@ -191,8 +196,8 @@ func convThresholdToAddition(scale float32, value uint, max uint) float32 {
 // Source:
 //     https://bisqwit.iki.fi/story/howto/dither/jy/#Appendix%202ThresholdMatrix
 //
-// strength should be in the range [-1, 1]. It is multiplied with 255, which is
-// then multiplied with the matrix.
+// strength should be in the range [-1, 1]. It is multiplied with 65535
+// (the max color value), which is then multiplied with the matrix.
 //
 // You can use this to change the amount the matrix is applied to the image, the
 // "strength" of the dithering matrix. Usually just keeping it at 1.0 is fine.
@@ -281,7 +286,7 @@ func Bayer(x, y uint, strength float32) PixelMapper {
 	}
 
 	// Create precalculated matrix
-	scale := 255.0 * strength
+	scale := 65535.0 * strength
 	max := x * y
 
 	precalc := make([][]float32, y)
@@ -292,10 +297,10 @@ func Bayer(x, y uint, strength float32) PixelMapper {
 		}
 	}
 
-	return PixelMapper(func(xx, yy int, r, g, b uint8) (uint8, uint8, uint8) {
-		return clamp(float32(r) + precalc[yy%int(y)][xx%int(x)]),
-			clamp(float32(g) + precalc[yy%int(y)][xx%int(x)]),
-			clamp(float32(b) + precalc[yy%int(y)][xx%int(x)])
+	return PixelMapper(func(xx, yy int, r, g, b uint16) (uint16, uint16, uint16) {
+		return RoundClamp(float32(r) + precalc[yy%int(y)][xx%int(x)]),
+			RoundClamp(float32(g) + precalc[yy%int(y)][xx%int(x)]),
+			RoundClamp(float32(b) + precalc[yy%int(y)][xx%int(x)])
 	})
 }
 
@@ -313,7 +318,7 @@ func Bayer(x, y uint, strength float32) PixelMapper {
 func PixelMapperFromMatrix(odm OrderedDitherMatrix, strength float32) PixelMapper {
 	ydim := len(odm.Matrix)
 	xdim := len(odm.Matrix[0])
-	scale := 255.0 * strength
+	scale := 65535.0 * strength
 
 	// Create precalculated matrix
 	precalc := make([][]float32, ydim)
@@ -324,9 +329,9 @@ func PixelMapperFromMatrix(odm OrderedDitherMatrix, strength float32) PixelMappe
 		}
 	}
 
-	return PixelMapper(func(xx, yy int, r, g, b uint8) (uint8, uint8, uint8) {
-		return clamp(float32(r) + precalc[yy%ydim][xx%xdim]),
-			clamp(float32(g) + precalc[yy%ydim][xx%xdim]),
-			clamp(float32(b) + precalc[yy%ydim][xx%xdim])
+	return PixelMapper(func(xx, yy int, r, g, b uint16) (uint16, uint16, uint16) {
+		return RoundClamp(float32(r) + precalc[yy%ydim][xx%xdim]),
+			RoundClamp(float32(g) + precalc[yy%ydim][xx%xdim]),
+			RoundClamp(float32(b) + precalc[yy%ydim][xx%xdim])
 	})
 }

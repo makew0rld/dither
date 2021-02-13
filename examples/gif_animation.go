@@ -10,7 +10,7 @@ import (
 	_ "image/png" // For frame decoding
 	"os"
 
-	"github.com/makeworld-the-better-one/dither"
+	"github.com/makeworld-the-better-one/dither/v2"
 )
 
 const numFrames = 20

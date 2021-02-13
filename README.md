@@ -41,9 +41,11 @@ More methods of dithering are being worked on, such as Riemersma, Yuliluoma, and
 In your project, run
 
 ```
-go get github.com/makeworld-the-better-one/dither@latest
+go get github.com/makeworld-the-better-one/dither/v2@latest
 go mod tidy
 ```
+
+You can import it as `"github.com/makeworld-the-better-one/dither/v2"` and use it as `dither`.
 
 ## Usage
 
@@ -152,8 +154,6 @@ Any `PixelMappers` that mention "grayscale" or have "grayscale" in their name ar
 you should definitely be using those functions over the color ones.
 
 All the `[][]uint` matrices are supposed to be applied with `PixelMapperFromMatrix`.
-
-If you ever find yourself multiplying a number by `255.0` (for example to scale a float in the range [0, 1]), make sure to add 0.5 before returning. Only by doing this can you get a correct answer in all cases. For example, `255.0 * n` should become `255.0 * n + 0.5`.
 
 
 ## Projects using `dither`

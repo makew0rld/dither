@@ -219,11 +219,12 @@ var ClusteredDotVerticalLine = OrderedDitherMatrix{
 var ClusteredDot8x8 = OrderedDitherMatrix{
 	Matrix: [][]uint{
 		// For some reason the values in the book were in the range of 0-64
-		// instead of 0-63.
+		// instead of 0-63. I changed the 64 value to 63, so that pure black
+		// didn't end up with occasional white dots.
 		{3, 9, 17, 27, 25, 15, 7, 1},
 		{11, 29, 38, 46, 44, 36, 23, 5},
 		{19, 40, 52, 58, 56, 50, 34, 13},
-		{31, 48, 60, 64, 62, 54, 42, 21},
+		{31, 48, 60, 63, 62, 54, 42, 21},
 		{30, 47, 59, 63, 61, 53, 41, 20},
 		{18, 39, 51, 57, 55, 49, 33, 12},
 		{10, 28, 37, 45, 43, 35, 22, 4},

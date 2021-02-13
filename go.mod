@@ -1,4 +1,4 @@
-module github.com/makeworld-the-better-one/dither
+module github.com/makeworld-the-better-one/dither/v2
 
 go 1.15
 

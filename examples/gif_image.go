@@ -10,7 +10,7 @@ import (
 	_ "image/png" // Imported for decoding of the input image
 	"os"
 
-	"github.com/makeworld-the-better-one/dither"
+	"github.com/makeworld-the-better-one/dither/v2"
 )
 
 func main() {
