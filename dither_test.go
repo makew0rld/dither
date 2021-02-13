@@ -62,7 +62,7 @@ func ditherAndCompareImage(input string, expected string, d *Ditherer, t *testin
 	}
 
 	if !reflect.DeepEqual(img, img2) {
-		t.Fatalf("expected image and dithered image are not equal")
+		t.Error("expected image and dithered image are not equal")
 	}
 }
 
