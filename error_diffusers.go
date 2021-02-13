@@ -34,6 +34,32 @@ func (e ErrorDiffusionMatrix) Offset(x, y, curPx int) (int, int) {
 	return x - curPx, y
 }
 
+// ErrorDiffusionStrength modifies an existing error diffusion matrix so that it will
+// be applied with the specified strength.
+//
+// strength is usually a value from 0 to 1.0, where 1.0 means 100% strength, and will
+// not modify the matrix at all. It is inversely proportional to contrast - reducing the
+// strength increases the contrast. It can be useful at values like 0.8 for reducing
+// noise in the dithered image.
+//
+// See the documentation for Bayer for more details.
+func ErrorDiffusionStrength(edm ErrorDiffusionMatrix, strength float32) ErrorDiffusionMatrix {
+	if strength == 1 {
+		return edm
+	}
+
+	dy := len(edm)
+	dx := len(edm[0])
+	edm2 := make(ErrorDiffusionMatrix, dy)
+	for y := 0; y < dy; y++ {
+		edm2[y] = make([]float32, dx)
+		for x := 0; x < dx; x++ {
+			edm2[y][x] = edm[y][x] * strength
+		}
+	}
+	return edm2
+}
+
 var Simple2D = ErrorDiffusionMatrix{
 	{0, 0.5},
 	{0.5, 0},

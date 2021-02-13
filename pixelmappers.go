@@ -209,7 +209,7 @@ func convThresholdToAddition(scale float32, value uint, max uint) float32 {
 // lighter ones just get quantized.
 //
 // You might also want to reduce the strength to reduce noise in the image, as dithering
-// doesn't produce smooth colored areas.
+// doesn't produce smooth colored areas. Usually a value around 0.8 is good for this.
 //
 // You can also make strength negative. If you know already that your image is dark, and so
 // you don't want it to be made bright, then this is a better approach then shrinking the

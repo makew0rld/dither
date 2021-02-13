@@ -210,6 +210,12 @@ func TestSerpentine(t *testing.T) {
 	ditherAndCompareImage(gradient, "edm_floyd-steinberg_serpentine.png", d, t)
 }
 
+func TestErrorDiffusionStrength(t *testing.T) {
+	d := NewDitherer(blackWhite)
+	d.Matrix = ErrorDiffusionStrength(FloydSteinberg, 0.5)
+	ditherAndCompareImage(gradient, "edm_floyd-steinberg_strength_02.png", d, t)
+}
+
 func TestErrorDiffusionColor(t *testing.T) {
 	d := NewDitherer(redGreenBlack)
 
