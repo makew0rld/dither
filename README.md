@@ -23,15 +23,16 @@ It does not support images that make use of the alpha channel, AKA transparency.
   - Some unusual horizontal or vertical line matrices
   - Yours?
     - Using `PixelMapperFromMatrix`, this library can dither using any matrix
-    - If you need more freedom, `PixelMapper`, can be used to implement any method of dithering affects each pixel individually
+    - If you need more freedom, `PixelMapper` can be used to implement any method of dithering that affects each pixel individually
 - **Error diffusion dithering**
   - Simple 2D
-  - Floyd-Steinberg
+  - Floyd-Steinberg, False Floyd-Steinberg
   - Jarvis-Judice-Ninke
   - Atkinson
   - Stucki
   - Burkes
   - Sierra/Sierra3, Sierra2, Sierra2-4A/Sierra-Lite
+  - [Steven Pigeon](https://hbfs.wordpress.com/2013/12/31/dithering/)
   - Yours? Custom error diffusion matrices can be used by the library.
 
 More methods of dithering are being worked on, such as Riemersma, Yuliluoma, and blue noise.
@@ -42,7 +43,6 @@ In your project, run
 
 ```
 go get github.com/makeworld-the-better-one/dither/v2@latest
-go mod tidy
 ```
 
 You can import it as `"github.com/makeworld-the-better-one/dither/v2"` and use it as `dither`.
@@ -90,7 +90,7 @@ d := dither.NewDitherer(palette)
 d.Mapper = dither.PixelMapperFromMatrix(dither.ClusteredDotDiagonal8x8)
 ```
 
-See the [docs](https://pkg.go.dev/github.com/makeworld-the-better-one/dither) for more.
+See the [docs](https://pkg.go.dev/github.com/makeworld-the-better-one/dither/v2) for more.
 
 
 ### More Examples
@@ -129,6 +129,12 @@ Generally, using Floyd-Steinberg serpentine dithering will produce the best resu
 d := dither.NewDitherer(yourPalette)
 d.Matrix = dither.FloydSteinberg
 d.Serpentine = true
+```
+
+Playing with the strength of the matrix might also be useful. The example above is at full strength, but sometimes that's too noisy. The code for 80% strength looks like this:
+
+```
+d.Matrix = dither.ErrorDiffusionStrength(dither.FloydSteinberg, 0.8)
 ```
 
 The main reason for using any other dithering algorithm would be
@@ -176,4 +182,4 @@ The largest problem with all of these libraries is that they don't linearize the
 
 This library is under the Mozilla Public License 2.0. Similar to the LGPL, this means you can use this library in your project, even if it's proprietary. But any changes you make to the library's code must be released publicly. Crucially, this license allows for statically linking this library.
 
-See [LICENSE](LICENSE) for details, and my [blog post](https://www.makeworld.gq/2021/01/lgpl_go.html) on why you should use the MPL over the LGPL for Go code.
+See [LICENSE](LICENSE) for details, and my [blog post](https://www.makeworld.space/2021/01/lgpl_go.html) on why you should use the MPL over the LGPL for Go code.
