@@ -20,8 +20,8 @@ package dither
 // Matrix values should almost always range from 0 to Max-1. If the matrix you found
 // ranges from 1 to Max, just subtract 1 from every value when programming it.
 type OrderedDitherMatrix struct {
-	Matrix [][]uint
-	Max    uint
+	Matrix [][]uint `json:"matrix"`
+	Max    uint     `json:"max"`
 }
 
 // ClusteredDot4x4 comes from http://caca.zoy.org/study/part2.html
