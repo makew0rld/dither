@@ -4,6 +4,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+
+## [Unreleased]
+### Added
+- JSON tags for `OrdereredDitherMatrix`
+
+### Changed
+- `Dither` never returns `nil`, making code simpler
+
+### Fixed
+- Bug where paletted images would never be detected as needing to be copied in `Dither`
+
+
 ## [2.0.0] - 2021-02-13
 ### Added
 - Added `ErrorDiffusionStrength` to set the strength of error diffusion dithering (#4)

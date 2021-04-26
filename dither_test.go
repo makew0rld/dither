@@ -46,9 +46,7 @@ func ditherAndCompareImage(input string, expected string, d *Ditherer, t *testin
 		t.Fatal(err)
 	}
 
-	if tmp := d.Dither(img); tmp != nil {
-		img = tmp
-	}
+	img = d.Dither(img)
 
 	f2, err := os.Open(expected)
 	if err != nil {
@@ -80,9 +78,7 @@ func createDitheredImage(input, output string, d *Ditherer, t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if tmp := d.Dither(img); tmp != nil {
-		img = tmp
-	}
+	img = d.Dither(img)
 
 	f2, err := os.Create(output)
 	if err != nil {

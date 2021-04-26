@@ -134,39 +134,36 @@ func (d *Ditherer) closestColor(r, g, b uint16) int {
 
 // Dither dithers the provided image.
 //
-// It will always try to change the provided image and return nil, but if that
+// It will always try to change the provided image and return it, but if that
 // is not possible it will return the dithered image as a copy.
 //
 // In comparison to DitherCopy, this can greatly reduce memory usage, and is quicker
 // because it usually won't copy the image at the beginning. It should be preferred
 // if you don't need to keep the original image.
 //
-// Cases where a copy will be returned include:
-//
+// Cases where a copy will be are limited to:
 // If the input image is *image.Paletted and the image's palette is different than
-// the Ditherer's; if the image can't be casted to draw.Image.
+// the Ditherer's, or if the image can't be casted to draw.Image.
 //
-// The returned image type (when not nil) is always *image.RGBA.
+// The returned image type when copied is *image.RGBA. But it may be different if
+// the image wasn't copied.
 func (d *Ditherer) Dither(src image.Image) image.Image {
 	if d.invalid() {
 		panic("dither: invalid Ditherer")
 	}
 
 	var img draw.Image
-	var ret image.Image = nil
 
-	if pi, ok := img.(*image.Paletted); ok {
+	if pi, ok := src.(*image.Paletted); ok {
 		if !samePalette(d.palette, pi.Palette) {
 			// Can't use this because it will change image colors
 			// Instead make a copy, and return that later
 			img = copyOfImage(src)
-			ret = img
 		}
 	} else if img, ok = src.(draw.Image); !ok {
 		// Can't be changed
 		// Instead make a copy and dither and return that
 		img = copyOfImage(src)
-		ret = img
 	}
 
 	if d.Mapper != nil {
@@ -178,7 +175,7 @@ func (d *Ditherer) Dither(src image.Image) image.Image {
 			r, g, b := toLinearRGB(c)
 			return d.palette[d.closestColor(d.Mapper(x, y, r, g, b))]
 		})
-		return ret
+		return img
 	}
 
 	// Matrix needs to be applied instead
@@ -265,7 +262,7 @@ func (d *Ditherer) Dither(src image.Image) image.Image {
 			x = oldX
 		}
 	}
-	return ret
+	return img
 }
 
 // GetColorModel returns the Ditherer's palette as a color.Model that finds the
@@ -291,8 +288,9 @@ func (d *Ditherer) DitherCopy(src image.Image) *image.RGBA {
 	}
 
 	dst := copyOfImage(src)
-	d.Dither(dst) // Will always return nil since dst is *image.RGBA
-	return dst
+	// Can be safely cast because dst is *image.RGBA and .Dither will never need
+	// to copy it. And even if it did, it would return this type too.
+	return d.Dither(dst).(*image.RGBA)
 }
 
 // DitherCopyConfig is like DitherCopy, but returns an image.Config as well.
