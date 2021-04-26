@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - Bug where paletted images would never be detected as needing to be copied in `Dither`
+- Palette is actually fully copied when creating the `Ditherer`, before the colors were shared with passed slice
 
 
 ## [2.0.0] - 2021-02-13

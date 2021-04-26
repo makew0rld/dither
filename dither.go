@@ -8,6 +8,17 @@ import (
 	"runtime"
 )
 
+// copyPalette deeply copies colors and returns a new slice that is unrelated.
+// Changing the passed slice will not affect the returned one in any way.
+func copyPalette(p []color.Color) []color.Color {
+	ret := make([]color.Color, len(p))
+	for i, c := range p {
+		r, g, b, a := c.RGBA()
+		ret[i] = color.RGBA64{uint16(r), uint16(g), uint16(b), uint16(a)}
+	}
+	return ret
+}
+
 // Ditherer dithers images according to the settings in the struct.
 // It can be safely reused for many images, and used concurrently.
 //
@@ -66,8 +77,7 @@ func NewDitherer(palette []color.Color) *Ditherer {
 	d := &Ditherer{}
 
 	// Palette is copied so the user can't modify it externally later
-	d.palette = make([]color.Color, len(palette))
-	copy(d.palette, palette)
+	d.palette = copyPalette(palette)
 
 	// Create linear RGB version of the palette
 	d.linearPalette = make([][3]uint16, len(d.palette))
@@ -99,9 +109,7 @@ func (d *Ditherer) invalid() bool {
 // GetPalette returns a copy of the current palette being used by the Ditherer.
 func (d *Ditherer) GetPalette() []color.Color {
 	// Palette is copied so the user can't modify it externally later
-	p := make([]color.Color, len(d.palette))
-	copy(p, d.palette)
-	return p
+	return copyPalette(d.palette)
 }
 
 func sqDiff(v1 uint16, v2 uint16) uint32 {
