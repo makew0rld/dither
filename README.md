@@ -156,8 +156,7 @@ Some general tips for working with the library.
 
 Any returned `PixelMappers` should be cached and re-used. There is no point in regenerating them, it just wastes resources.
 
-Any `PixelMappers` that mention "grayscale" or have "grayscale" in their name are completely safe to use with color input images, and even color palettes. It's just that they always return grayscale colors. If you want grayscale output,
-you should definitely be using those functions over the color ones.
+If the palette is grayscale, the input image should be converted to grayscale first to get accurate results.
 
 All the `[][]uint` matrices are supposed to be applied with `PixelMapperFromMatrix`.
 
