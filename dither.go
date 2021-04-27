@@ -273,10 +273,10 @@ func (d *Ditherer) Dither(src image.Image) image.Image {
 	return img
 }
 
-// GetColorModel returns the Ditherer's palette as a color.Model that finds the
+// GetColorModel returns a copy of the Ditherer's palette as a color.Model that finds the
 // closest color using Euclidean distance in sRGB space.
 func (d *Ditherer) GetColorModel() color.Model {
-	return color.Palette(d.palette)
+	return color.Palette(copyPalette(d.palette))
 }
 
 // DitherConfig is like Dither, but returns an image.Config as well.
@@ -322,7 +322,7 @@ func (d *Ditherer) DitherPaletted(src image.Image) *image.Paletted {
 	}
 
 	rgba := d.DitherCopy(src)
-	p := image.NewPaletted(rgba.Bounds(), d.palette)
+	p := image.NewPaletted(rgba.Bounds(), copyPalette(d.palette))
 	copyImage(p, rgba)
 	return p
 }

@@ -6,6 +6,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ## [Unreleased]
+
+Update README example before release:
+
+```go
+// If it can't then a dithered copy will be returned.
+img = d.Dither(img)
+```
+
 ### Added
 - JSON tags for `OrdereredDitherMatrix`
 
@@ -14,7 +22,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - Bug where paletted images would never be detected as needing to be copied in `Dither`
-- Palette is actually fully copied when creating the `Ditherer`, before the colors were shared with passed slice
+- Palette is actually fully copied when needed, before the colors were shared with passed slice
+  - `NewDitherer`
+  - `Ditherer.GetColorPalette`
+  - `DitherPaletted` and `DitherPalettedConfig`
+  - `GetColorModel`
 
 
 ## [2.0.0] - 2021-02-13
