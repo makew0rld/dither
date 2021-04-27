@@ -133,7 +133,7 @@ d.Serpentine = true
 
 Playing with the strength of the matrix might also be useful. The example above is at full strength, but sometimes that's too noisy. The code for 80% strength looks like this:
 
-```
+```go
 d.Matrix = dither.ErrorDiffusionStrength(dither.FloydSteinberg, 0.8)
 ```
 
