@@ -7,6 +7,8 @@ dither is a library for dithering images in Go. It has many dithering algorithms
 
 It does not support images that make use of the alpha channel, AKA transparency.
 
+*Make sure to set your browser zoom to 100% to view these images properly*
+
 | **Original** | **Dithering Algorithm** |
 | :-: | :-: |
 | | Floyd-Steinberg (black and white palette) |
