@@ -109,11 +109,11 @@ Operations that only affect each pixel individually are parallelized, using `run
 
 ## Scaling images
 
-A dithered output image will only look right at 100% size. As you scale **down**, the image will immediately get darker, and strange grid-like artifacts will appear, known as a [moiré pattern](https://en.wikipedia.org/wiki/Moir%C3%A9_pattern). This is due to how dithered images work, and is not something this library can fix.
+A dithered output image will only look right at 100% size. As you scale *down*, the image will immediately get darker, and strange grid-like artifacts will appear, known as a [moiré pattern](https://en.wikipedia.org/wiki/Moir%C3%A9_pattern). This is due to how dithered images work, and is not something this library can fix.
 
-The best thing to do is to scale the *input* image to the *exact* size you want before using this library.
+The best thing to do is to scale the *input* image to the *exact* size you want before using this library. But sometimes you want to scale the image up after dithering, to make the dithering effect more obvious for aesthetic purposes.
 
-As for scaling the dithered output image **up** (above 100%), that will only look fine if you use nearest-neighbor scaling - the kind of scaling that produces pixelated results. Otherwise the dither pixel values will be blurred and averaged, which will mess things up. And even once you're using that, it will only not darken the image after it's been scaled to 200% or above. In between 100% and 200% will still alter the image brightness.
+So for scaling the dithered output image *up* (above 100%), that will only look fine if you use **nearest-neighbor scaling** - the kind of scaling that produces pixelated results. Otherwise the dither pixel values will be blurred and averaged, which will mess things up. And even once you're using that, it will still produce moiré patterns, unless you're scaling by a multiple of the original dimensions. **So when scaling up, you should be scaling by 2x or 3x, rather than a non-integer like 1.34x.**
 
 ## Encoding output
 
