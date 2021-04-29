@@ -68,10 +68,8 @@ d := dither.NewDitherer(palette)
 d.Matrix = dither.FloydSteinberg
 
 // Dither the image, attempting to modify the existing image
-// It returns nil if the image was modified, otherwise it returns a dithered copy
-if tmp := d.Dither(img); tmp != nil {
-    img = tmp
-}
+// If it can't then a dithered copy will be returned.
+img = d.Dither(img)
 
 // Now use img - save it as PNG, display it on the screen, etc
 ```
