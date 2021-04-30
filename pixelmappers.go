@@ -181,7 +181,8 @@ func convThresholdToAddition(scale float32, value uint, max uint) float32 {
 }
 
 // Bayer returns a PixelMapper that applies a Bayer matrix with the specified size.
-// Please read this entire documentation, and see my recommendations at the end.
+// Please read this entire documentation, and see my recommendations at the end,
+// especially if you're dithering color images.
 //
 // First off, cache the result of this function. It's not trivial to generate,
 // and it can be re-used or used concurrently with no issues.
@@ -244,11 +245,13 @@ func convThresholdToAddition(scale float32, value uint, max uint) float32 {
 // making dark images really bright. Try staying between 0.5 and 1.0.
 //
 // If you're using a Bayer size larger than 4x4, just using 1.0 for strength should be fine
-// for all kinds of grayscale images.
+// for most kinds of grayscale images.
 //
-// As for color images, after my own experimentation, I've determined that everything I said
-// above about grayscale images still applies. Stick to 1.0 and Bayer sizes above 4x4 if you
-// can, and changing the strength still changes contrast as described above.
+// Color images are different. The Bayer matrix's bias to brightness applies to each RGB
+// channel, and so the color of the image can become quite distorted at 1.0 strength.
+// Several sites I have seen recommend 0.64 strength (written as 256/4), and from my own
+// testing this is often a good value for color images. Do not default to 1.0 for Bayer
+// dithering of color images.
 //
 // Of course, experiment for yourself. And let me know if I'm wrong!
 func Bayer(x, y uint, strength float32) PixelMapper {
