@@ -163,7 +163,7 @@ All the `[][]uint` matrices are supposed to be applied with `PixelMapperFromMatr
 
 ## Projects using `dither`
 
-- I'm working on a CLI tool - for experimentation, automated dithering, and software pipelines
+- [didder](https://github.com/makeworld-the-better-one/didder) - a powerful CLI dithering tool
 - Your project? Build something fun, show how cool dithering can be! Some ideas / things I'd love to see:
   - A client-side web app for dithering using WASM
   - A GUI desktop application
