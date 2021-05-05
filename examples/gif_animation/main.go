@@ -32,7 +32,7 @@ func main() {
 	// gif.GIF requires *image.Paletted is used, so DitherPaletted
 	// is called instead of Dither.
 
-	f, err := os.Open("examples/input/ball_001.png")
+	f, err := os.Open("../input/ball_001.png")
 	if err != nil {
 		panic(err)
 	}
@@ -48,7 +48,7 @@ func main() {
 
 	// Decode other frames
 	for i := 1; i < numFrames; i++ {
-		f, err := os.Open(fmt.Sprintf("examples/input/ball_0%02d.png", i))
+		f, err := os.Open(fmt.Sprintf("../input/ball_0%02d.png", i))
 		if err != nil {
 			panic(err)
 		}
@@ -78,7 +78,7 @@ func main() {
 		Config: config,
 	}
 
-	f2, err := os.Create("examples/output/gif_animation.gif")
+	f2, err := os.Create("../output/gif_animation.gif")
 	if err != nil {
 		panic(err)
 	}

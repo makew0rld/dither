@@ -33,7 +33,7 @@ func main() {
 
 	// Open an image and save it as a dithered GIF
 
-	f, err := os.Open("images/input/peppers.png")
+	f, err := os.Open("../../images/input/peppers.png")
 	if err != nil {
 		panic(err)
 	}
@@ -44,7 +44,7 @@ func main() {
 		panic(err)
 	}
 
-	f2, err := os.Create("examples/output/gif_image.gif")
+	f2, err := os.Create("../output/gif_image.gif")
 	if err != nil {
 		panic(err)
 	}

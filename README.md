@@ -97,8 +97,8 @@ See the [docs](https://pkg.go.dev/github.com/makeworld-the-better-one/dither/v2)
 
 Sometimes you can't dither using the above code. These examples show how you can use this library in those situations.
 
-- [Output to a static GIF](examples/gif_image.go)
-- [Output to an animated GIF](examples/gif_animation.go)
+- [Output to a static GIF](examples/gif_image/main.go)
+- [Output to an animated GIF](examples/gif_animation/main.go)
 
 If you're interested in what specific algorithms look like, you can check out the tests [output](images/output/) folder.
 
