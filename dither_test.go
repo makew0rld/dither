@@ -341,12 +341,12 @@ func TestAlpha(t *testing.T) {
 	})
 	d.Mapper = Bayer(4, 4, 1)
 
-	createDitheredImage(dice, "alpha_bayer.png", d, t)
+	ditherAndCompareImage(dice, "alpha_bayer.png", d, t)
 
 	d.Mapper = nil
 	d.Matrix = FloydSteinberg
 
-	createDitheredImage(dice, "alpha_floyd-steinberg.png", d, t)
+	ditherAndCompareImage(dice, "alpha_floyd-steinberg.png", d, t)
 }
 
 // func TestDrawer(t *testing.T) {
