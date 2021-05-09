@@ -30,6 +30,7 @@ var (
 const (
 	gradient = "images/input/gradient.png"
 	peppers  = "images/input/peppers.png"
+	dice     = "images/input/dice.png"
 )
 
 func ditherAndCompareImage(input string, expected string, d *Ditherer, t *testing.T) {
@@ -328,6 +329,24 @@ func TestPixelMapperFromMatrix(t *testing.T) {
 	ditherAndCompareImage(gradient, "ClusteredDot6x6_3.png", d, t)
 	d.Mapper = PixelMapperFromMatrix(ClusteredDotDiagonal8x8_3, 1.0)
 	ditherAndCompareImage(gradient, "ClusteredDotDiagonal8x8_3.png", d, t)
+}
+
+func TestAlpha(t *testing.T) {
+	d := NewDitherer([]color.Color{
+		color.Black,
+		color.White,
+		color.RGBA{255, 0, 0, 255},
+		color.RGBA{0, 255, 0, 255},
+		color.RGBA{0, 0, 255, 255},
+	})
+	d.Mapper = Bayer(4, 4, 1)
+
+	createDitheredImage(dice, "alpha_bayer.png", d, t)
+
+	d.Mapper = nil
+	d.Matrix = FloydSteinberg
+
+	createDitheredImage(dice, "alpha_floyd-steinberg.png", d, t)
 }
 
 // func TestDrawer(t *testing.T) {

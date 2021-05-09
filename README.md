@@ -5,7 +5,7 @@
 
 dither is a library for dithering images in Go. It has many dithering algorithms built-in, and allows you to specify your own. Correctness is a top priority, as well as performance. It is designed to work well on its own, but also implements interfaces from the standard library, so that it can be integrated easily in a wide variety of situtations.
 
-It does not support images that make use of the alpha channel, AKA transparency.
+It supports images that make use of the alpha channel, AKA transparency.
 
 *Make sure to set your browser zoom to 100% to view these images properly*
 
@@ -159,6 +159,15 @@ Any returned `PixelMappers` should be cached and re-used. There is no point in r
 If the palette is grayscale, the input image should be converted to grayscale first to get accurate results.
 
 All the `[][]uint` matrices are supposed to be applied with `PixelMapperFromMatrix`.
+
+
+## Images with transparency
+
+Images with transparency are only supported in v2.2.0 and after.
+
+This library does not dither in the alpha channel or support transparent palettes. Instead it just keeps track of the alpha channel, and the dithered image returned will always have the exact same alpha values for each pixel. This allows for dithering of images with transparent parts.
+
+Dithering images with semi-transparent pixels will also work, but is not as useful, because the output image will *appear* to have colors that are not in the palette, due to whatever background image you use.
 
 
 ## Projects using `dither`

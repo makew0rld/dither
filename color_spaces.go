@@ -25,6 +25,8 @@ func linearize255to65535(i uint8) uint16 {
 }
 
 // toLinearRGB converts a non-linear sRGB color to a linear RGB color space.
+// RGB values are taken directly and alpha value is ignored, so this will not
+// handle non-opaque colors properly.
 func toLinearRGB(c color.Color) (uint16, uint16, uint16) {
 	// Optimize for different color types
 	switch v := c.(type) {

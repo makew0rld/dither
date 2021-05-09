@@ -29,6 +29,9 @@ func copyPalette(p []color.Color) []color.Color {
 //
 // You can only set one of Matrix, Mapper, or Special. Trying to dither when
 // none or more than one of those are set will cause the function to panic.
+//
+// All methods can handle images with transparency, unless otherwise specified.
+// Read the docs before using!
 type Ditherer struct {
 
 	// Matrix is the ErrorDiffusionMatrix for dithering.
@@ -60,7 +63,8 @@ type Ditherer struct {
 	Serpentine bool
 
 	// palette holds the colors the dithered image is allowed to use, in the
-	// sRGB color space.
+	// sRGB color space. It is guaranteed to only hold colors of the type
+	// color.RGBA64.
 	palette []color.Color
 
 	// linearPalette holds all the palette colors, but in linear RGB space.
@@ -69,6 +73,7 @@ type Ditherer struct {
 
 // NewDitherer creates a new Ditherer that uses a copy of the provided palette.
 // If the palette is empty or nil then nil will be returned.
+// All palette colors should be opaque.
 func NewDitherer(palette []color.Color) *Ditherer {
 	if len(palette) == 0 {
 		return nil
@@ -140,6 +145,73 @@ func (d *Ditherer) closestColor(r, g, b uint16) int {
 	return color
 }
 
+// unpremultAndLinearize unpremultiplies the provided color, and returns the
+// linearized RGB values, as well as the unchanged alpha value.
+func unpremultAndLinearize(c color.Color) (uint16, uint16, uint16, uint16) {
+	// alpha
+	var a uint16
+
+	// Optimize for different color types
+	// Opaque colors are fast-tracked
+	// Non-premultiplied colors aren't unpremulted, and all others are
+	switch v := c.(type) {
+	case color.Gray:
+		a = 0xffff
+	case color.Gray16:
+		a = 0xffff
+	case color.NRGBA:
+		// (1/255)*65535 = 257
+		// This converts 8-bit color into 16-bit
+		a = uint16(v.A) * 257
+	case color.NRGBA64:
+		a = v.A
+	default:
+		c = color.NRGBA64Model.Convert(c)
+		_, _, _, x := c.RGBA()
+		a = uint16(x)
+	}
+
+	r, g, b := toLinearRGB(c)
+	return r, g, b, a
+}
+
+// premult takes the current position in the image and the dithered
+// color for that position, and returns a color that's corrected to
+// take into account the alpha value of the original image at that
+// position -- premultipling it.
+func (d *Ditherer) premult(c color.RGBA64, x, y int, img image.Image) color.RGBA64 {
+	// Algorithm described in #8
+	// https://github.com/makeworld-the-better-one/dither/issues/8
+
+	_, _, _, a := img.At(x, y).RGBA()
+	if a == 0 {
+		// Transparent, no color values are held
+		return color.RGBA64{0, 0, 0, 0}
+	}
+	if a == 0xffff {
+		// Pixel is opaque, no alpha math needed
+		return c
+	}
+	// Multiply RGB by alpha value - return premultiplied color
+	// Adapted from https://github.com/golang/go/blob/go1.16.4/src/image/color/color.go#L84
+	r := uint32(c.R)
+	r *= a
+	r /= 0xffff
+	g := uint32(c.G)
+	g *= a
+	g /= 0xffff
+	b := uint32(c.B)
+	b *= a
+	b /= 0xffff
+
+	return color.RGBA64{
+		R: uint16(r),
+		G: uint16(g),
+		B: uint16(b),
+		A: uint16(a),
+	}
+}
+
 // Dither dithers the provided image.
 //
 // It will always try to change the provided image and return it, but if that
@@ -180,8 +252,20 @@ func (d *Ditherer) Dither(src image.Image) image.Image {
 			workers = runtime.GOMAXPROCS(0)
 		}
 		parallel(workers, img.(draw.Image), img, func(x, y int, c color.Color) color.Color {
-			r, g, b := toLinearRGB(c)
-			return d.palette[d.closestColor(d.Mapper(x, y, r, g, b))]
+			r, g, b, a := unpremultAndLinearize(c)
+
+			if a == 0 {
+				// Pixel is transparent, don't dither it
+				return c
+			}
+
+			return d.premult(
+				// Use PixelMapper -> find closest palette color -> get that color
+				// -> cast to color.RGBA64
+				// Comes from d.palette so this cast will always work
+				d.palette[d.closestColor(d.Mapper(x, y, r, g, b))].(color.RGBA64),
+				x, y, img,
+			)
 		})
 		return img
 	}
@@ -207,7 +291,7 @@ func (d *Ditherer) Dither(src image.Image) image.Image {
 		c := lins[y][x]
 		if c[0] == nil {
 			// This pixel hasn't been linearized yet
-			r, g, b := toLinearRGB(img.At(x, y))
+			r, g, b, _ := unpremultAndLinearize(img.At(x, y))
 			linearSet(x, y, r, g, b)
 			return r, g, b
 		}
@@ -226,7 +310,7 @@ func (d *Ditherer) Dither(src image.Image) image.Image {
 			// Quantize current pixel
 			oldR, oldG, oldB := linearAt(x, y)
 			newColorIdx := d.closestColor(oldR, oldG, oldB)
-			img.Set(x, y, d.palette[newColorIdx])
+			img.Set(x, y, d.premult(d.palette[newColorIdx].(color.RGBA64), x, y, img))
 
 			new := d.linearPalette[newColorIdx]
 			// Quant errors in each channel
@@ -314,8 +398,13 @@ func (d *Ditherer) DitherCopyConfig(src image.Image) (*image.RGBA, image.Config)
 // *image.Paletted. The src image remains unchanged. If you don't need an
 // *image.Paletted, using Dither or DitherCopy should be preferred.
 //
+// The palette of the returned image is the same palette the ditherer uses
+// internally -- it will be equal to the output of GetPalette().
+//
 // If the Ditherer's palette has over 256 colors then the function will panic,
 // because *image.Paletted does not allow for that.
+//
+// DitherPaletted can't handle images with transparency.
 func (d *Ditherer) DitherPaletted(src image.Image) *image.Paletted {
 	if len(d.palette) > 256 {
 		panic("dither: DitherPaletted: palette has over 256 colors which *image.Paletted doesn't support")
@@ -328,6 +417,8 @@ func (d *Ditherer) DitherPaletted(src image.Image) *image.Paletted {
 }
 
 // DitherPalettedConfig is like DitherPaletted, but returns an image.Config as well.
+//
+// DitherPalettedConfig can't handle images with transparency.
 func (d *Ditherer) DitherPalettedConfig(src image.Image) (*image.Paletted, image.Config) {
 	return d.DitherPaletted(src), image.Config{
 		ColorModel: d.GetColorModel(),
