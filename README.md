@@ -173,8 +173,9 @@ Dithering images with semi-transparent pixels will also work, but is not as usef
 ## Projects using `dither`
 
 - [didder](https://github.com/makeworld-the-better-one/didder) - a powerful CLI dithering tool
+- [wasm-palette-converter](https://github.com/CrispyBaguette/wasm-palette-converter) - dithering images to a color palette, in the browser
 - Your project? Build something fun, show how cool dithering can be! Some ideas / things I'd love to see:
-  - A client-side web app for dithering using WASM
+  - A client-side web app for general-purpose dithering using WASM
   - A GUI desktop application
 
 
