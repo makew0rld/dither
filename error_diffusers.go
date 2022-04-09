@@ -94,7 +94,7 @@ var Stucki = ErrorDiffusionMatrix{
 }
 
 var Burkes = ErrorDiffusionMatrix{
-	{0, 0, 0, 8.0 / 32, 8.0 / 32},
+	{0, 0, 0, 8.0 / 32, 4.0 / 32},
 	{2.0 / 32, 4.0 / 32, 8.0 / 32, 4.0 / 32, 2.0 / 32},
 }
 
