@@ -135,12 +135,19 @@ func (d *Ditherer) closestColor(r, g, b uint16) int {
 
 		// Euclidean distance, but the square root part is removed
 		// Weight by luminance value to approximate radiant power / luminance
-		// as humans perceive it. Values come from Rec.709 or sRGB.
+		// as humans perceive it.
+		//
+		// These values were taken from Wikipedia:
+		// https://en.wikipedia.org/wiki/Grayscale#Colorimetric_(perceptual_luminance-preserving)_conversion_to_grayscale
+		// 0.2126, 0.7152, 0.0722
+		// The are changed to fractions here to keep everything in integer math:
+		//     1063/5000, 447/625, 361/5000
+		// Unfortunately this requires promoting them to uint64 to prevent overflow
 
 		dist := uint32(
-			0.2126*float32(sqDiff(r, c[0])) +
-				0.7152*float32(sqDiff(g, c[1])) +
-				0.0722*float32(sqDiff(b, c[2])),
+			1063*uint64(sqDiff(r, c[0]))/5000 +
+				447*uint64(sqDiff(g, c[1]))/625 +
+				361*uint64(sqDiff(b, c[2]))/5000,
 		)
 
 		if dist < best {
