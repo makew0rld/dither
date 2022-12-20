@@ -132,8 +132,16 @@ func (d *Ditherer) closestColor(r, g, b uint16) int {
 	// Go through each color and find the closest one
 	color, best := 0, uint32(math.MaxUint32)
 	for i, c := range d.linearPalette {
+
 		// Euclidean distance, but the square root part is removed
-		dist := sqDiff(r, c[0]) + sqDiff(g, c[1]) + sqDiff(b, c[2])
+		// Weight by luminance value to approximate radiant power / luminance
+		// as humans perceive it. Values come from Rec.709 or sRGB.
+
+		dist := uint32(
+			0.2126*float32(sqDiff(r, c[0])) +
+				0.7152*float32(sqDiff(g, c[1])) +
+				0.0722*float32(sqDiff(b, c[2])),
+		)
 
 		if dist < best {
 			if dist == 0 {
