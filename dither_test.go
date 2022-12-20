@@ -5,6 +5,7 @@ import (
 	"image/color"
 	_ "image/jpeg"
 	"image/png"
+	"math/rand"
 	"os"
 	"reflect"
 	"testing"
@@ -92,6 +93,7 @@ func createDitheredImage(input, output string, d *Ditherer, t *testing.T) {
 }
 
 func TestRandomNoiseGrayscale(t *testing.T) {
+	rand.Seed(1)
 	d := NewDitherer(blackWhite)
 	d.Mapper = RandomNoiseGrayscale(-0.5, 0.5)
 	d.SingleThreaded = true
@@ -99,6 +101,7 @@ func TestRandomNoiseGrayscale(t *testing.T) {
 }
 
 func TestRandomNoiseRGB(t *testing.T) {
+	rand.Seed(1)
 	noise := RandomNoiseRGB(-0.5, 0.5, -0.5, 0.5, -0.5, 0.5)
 
 	d := NewDitherer(redGreenBlack)
