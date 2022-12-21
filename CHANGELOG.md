@@ -5,8 +5,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+- When comparing colors, each channel is weighted according to human luminance perception (didder#14)
+
 ### Fixed
 - Corrected Burkes matrix (#10)
+- Palette order no longer affects output (#9)
+- Grayscale palettes don't require the input image be converted to grayscale beforehand (#7)
 
 ## [2.2.0] - 2021-05-09
 ### Added

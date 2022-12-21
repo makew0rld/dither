@@ -5,6 +5,8 @@
 
 dither is a library for dithering images in Go. It has many dithering algorithms built-in, and allows you to specify your own. Correctness is a top priority, as well as performance. It is designed to work well on its own, but also implements interfaces from the standard library, so that it can be integrated easily in a wide variety of situtations.
 
+This library is uniquely correct from a math and quality perspective. It linearizes the image, and color comparisons are done with human luminance perception in mind (channel weighting). Few-to-no other libraries do this.
+
 It supports images that make use of the alpha channel, AKA transparency.
 
 *Make sure to set your browser zoom to 100% to view these images properly*
@@ -155,8 +157,6 @@ I might end up writing another library that implements some common algorithms fo
 Some general tips for working with the library.
 
 Any returned `PixelMappers` should be cached and re-used. There is no point in regenerating them, it just wastes resources.
-
-If the palette is grayscale, the input image should be converted to grayscale first to get accurate results.
 
 All the `[][]uint` matrices are supposed to be applied with `PixelMapperFromMatrix`.
 
