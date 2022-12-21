@@ -158,6 +158,8 @@ Some general tips for working with the library.
 
 Any returned `PixelMappers` should be cached and re-used. There is no point in regenerating them, it just wastes resources.
 
+If the palette is grayscale, the input image should be converted to grayscale first to get accurate results.
+
 All the `[][]uint` matrices are supposed to be applied with `PixelMapperFromMatrix`.
 
 
