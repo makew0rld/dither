@@ -292,27 +292,29 @@ func (d *Ditherer) Dither(src image.Image) image.Image {
 
 	// Store linear values here instead of converting back and forth and storing
 	// sRGB values inside the image.
-	// Pointers are used to differentiate between a zero value and an unset value
-	lins := make([][][3]*uint16, b.Dy())
+	lins := make([][][3]uint16, b.Dy())
 	for i := 0; i < len(lins); i++ {
-		lins[i] = make([][3]*uint16, b.Dx())
+		lins[i] = make([][3]uint16, b.Dx())
 	}
 
 	// Setters and getters for that linear storage
 	linearSet := func(x, y int, r, g, b uint16) {
-		lins[y][x] = [3]*uint16{&r, &g, &b}
+		lins[y][x] = [3]uint16{r, g, b}
 	}
 	linearAt := func(x, y int) (uint16, uint16, uint16) {
 		c := lins[y][x]
-		if c[0] == nil {
-			// This pixel hasn't been linearized yet
-			r, g, b, _ := unpremultAndLinearize(img.At(x, y))
-			linearSet(x, y, r, g, b)
-			return r, g, b
-		}
-		return *c[0], *c[1], *c[2]
+		return c[0], c[1], c[2]
 	}
 
+	// Pre-fill that 2D-array with the linearized image pixels
+	for y := b.Min.Y; y < b.Max.Y; y++ {
+		for x := b.Min.X; x < b.Max.X; x++ {
+			r, g, b, _ := unpremultAndLinearize(img.At(x, y))
+			linearSet(x, y, r, g, b)
+		}
+	}
+
+	// Now do the actual dithering
 	for y := b.Min.Y; y < b.Max.Y; y++ {
 		for x := b.Min.X; x < b.Max.X; x++ {
 

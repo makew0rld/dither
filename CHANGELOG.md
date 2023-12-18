@@ -5,6 +5,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [Unreleased]
+### Changed
+- Increased error diffusion dithering speed by ~50%
+- Reduced error diffusion dithering memory usage by ~70%
+
 ### Fixed
 - Docs: the input does still need to be converted to grayscale for grayscale palettes, actually (#7)
 

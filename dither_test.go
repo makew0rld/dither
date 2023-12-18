@@ -246,6 +246,34 @@ func TestErrorDiffusionColor(t *testing.T) {
 	ditherAndCompareImage(peppers, "edm_peppers_atkinson_red-green-yellow-black.png", d, t)
 }
 
+func BenchmarkErrorDiffusionColor(b *testing.B) {
+	f, err := os.Open(peppers)
+	if err != nil {
+		b.Fatal(err)
+	}
+	defer f.Close()
+
+	img, _, err := image.Decode(f)
+	if err != nil {
+		b.Fatal(err)
+	}
+
+	palette := []color.Color{
+		color.Black,
+		color.White,
+		color.RGBA{255, 0, 0, 255}, // Red
+		color.RGBA{0, 255, 0, 255}, // Green
+		color.RGBA{0, 0, 255, 255}, // Blue
+	}
+	d := NewDitherer(palette)
+	d.Matrix = FloydSteinberg
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		_ = d.Dither(img)
+	}
+}
+
 func TestSubset(t *testing.T) {
 	assert.Equal(t, true, subset([]color.Color{color.Black}, blackWhite))
 	assert.Equal(t, false, subset(blackWhite, []color.Color{color.Black}))
