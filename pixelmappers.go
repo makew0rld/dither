@@ -203,7 +203,7 @@ func convThresholdToAddition(scale float32, value uint, max uint) float32 {
 // You can use this to change the amount the matrix is applied to the image, the
 // "strength" of the dithering matrix. Usually just keeping it at 1.0 is fine.
 //
-// The closer to zero stength is, the smaller the range of colors that will be
+// The closer to zero strength is, the smaller the range of colors that will be
 // dithered. Colors outside that range will just be quantized, and not have a Bayer matrix
 // applied. To dither the entire color range, set it to 1.0.
 //
